@@ -1205,10 +1205,34 @@ a {
 }
 
 .promo__portable a {
+  white-space: nowrap;
   color: var(--promo-fg);
   font-weight: 550;
   text-decoration-color: color-mix(in srgb, var(--accent) 70%, transparent);
   text-underline-offset: 3px;
+}
+
+/* Download que ainda não foi publicado. */
+.platform.is-soon,
+.platform.is-soon:hover {
+  border-color: var(--promo-line);
+  background: rgb(255 255 255 / 0.03);
+  color: var(--promo-soft);
+  box-shadow: none;
+  transform: none;
+  cursor: default;
+}
+
+.platform.is-soon .icon,
+.platform.is-soon .platform__file {
+  color: var(--promo-soft);
+}
+
+.promo__portable a.is-soon {
+  color: var(--promo-soft);
+  font-weight: 400;
+  text-decoration: none;
+  cursor: default;
 }
 
 .promo__note {

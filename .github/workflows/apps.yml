@@ -20,7 +20,38 @@ permissions:
   contents: write
 
 jobs:
+  # Cria a Release primeiro; cada sistema envia seus arquivos assim que fica pronto,
+  # sem esperar os outros (as máquinas Mac do GitHub costumam demorar mais).
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - id: tag
+        run: echo "tag=${{ github.event.inputs.versao || github.ref_name }}" >> "$GITHUB_OUTPUT"
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Converta ${{ steps.tag.outputs.tag }}
+          make_latest: true
+          body: |
+            ## Baixar
+
+            | Sistema | Instalar | Sem instalar (extrair e abrir) |
+            |---|---|---|
+            | Windows | `Converta-Setup.exe` | `Converta-windows.zip` → pasta `Converta` → `Converta.exe` |
+            | macOS | `Converta-mac.dmg` | `Converta-mac.zip` → `Converta.app` |
+            | Linux | `Converta-linux.AppImage` | `Converta-linux.tar.gz` → `converta` |
+
+            **Primeira vez no Windows:** se aparecer "O Windows protegeu o computador", clique em
+            **Mais informações → Executar assim mesmo**.
+
+            **Primeira vez no Mac:** se aparecer um aviso, abra **Ajustes do Sistema → Privacidade e Segurança**
+            e clique em **Abrir Mesmo Assim**.
+
   build:
+    needs: release
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +65,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_GITHUB_REPO: ${{ github.repository }}
       - run: npx electron-builder --publish never
         env:
           # Sem certificado de assinatura: o Mac recebe assinatura "ad-hoc".
@@ -51,33 +84,13 @@ jobs:
             release/*.zip
             release/*.tar.gz
           if-no-files-found: error
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
+      - name: Anexar à Release
+        uses: softprops/action-gh-release@v2
         with:
-          path: arquivos
-          merge-multiple: true
-      - uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.inputs.versao || github.ref_name }}
-          target_commitish: ${{ github.sha }}
-          name: Converta ${{ github.event.inputs.versao || github.ref_name }}
-          make_latest: true
-          files: arquivos/*
-          body: |
-            ## Baixar
-
-            | Sistema | Instalar | Sem instalar (extrair e abrir) |
-            |---|---|---|
-            | Windows | `Converta-Setup.exe` | `Converta-windows.zip` → pasta `Converta` → `Converta.exe` |
-            | macOS | `Converta-mac.dmg` | `Converta-mac.zip` → `Converta.app` |
-            | Linux | `Converta-linux.AppImage` | `Converta-linux.tar.gz` → `converta` |
-
-            **Primeira vez no Windows:** se aparecer "O Windows protegeu o computador", clique em
-            **Mais informações → Executar assim mesmo**.
-
-            **Primeira vez no Mac:** se aparecer um aviso, abra **Ajustes do Sistema → Privacidade e Segurança**
-            e clique em **Abrir Mesmo Assim**.
+          tag_name: ${{ needs.release.outputs.tag }}
+          files: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/*.zip
+            release/*.tar.gz
