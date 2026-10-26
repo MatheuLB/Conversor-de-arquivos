@@ -50,14 +50,18 @@ git push origin v1.0.0
 
 Em uns 10 minutos aparece uma **Release** no GitHub com:
 
-- `Converta-Setup.exe` — instalador do Windows
-- `Converta-mac.dmg` — macOS (Intel e Apple Silicon)
-- `Converta-linux.AppImage` — Linux (é só dar permissão de execução e abrir)
+| Sistema | Instalador | Portátil (só extrair e abrir) |
+|---|---|---|
+| Windows | `Converta-Setup.exe` | `Converta-windows.zip` → pasta `Converta` → `Converta.exe` |
+| macOS (Intel e Apple Silicon) | `Converta-mac.dmg` | `Converta-mac.zip` → `Converta.app` |
+| Linux | `Converta-linux.AppImage` (dar permissão de execução e abrir) | `Converta-linux.tar.gz` → pasta `Converta-linux` → `converta` |
 
-Os botões **Baixar o app** do site apontam para a Release mais recente automaticamente.
+Os botões **Baixar o app** do site apontam para a Release mais recente automaticamente,
+com links para as versões portáteis logo abaixo.
 
 Também dá para gerar no próprio computador: `npm run dist:win` (no Windows), `npm run dist:mac` (no Mac)
 ou `npm run dist:linux` (no Linux). Os arquivos saem na pasta `release/`.
+A versão portátil do Windows sai de `node scripts/portable-zip.mjs` (o `dist:win` já roda esse passo).
 
 ### Avisos de segurança na primeira abertura
 

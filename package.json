@@ -15,7 +15,7 @@
     "preview": "vite preview",
     "app": "npm run build && electron .",
     "dist": "npm run build && electron-builder",
-    "dist:win": "npm run build && electron-builder --win",
+    "dist:win": "npm run build && electron-builder --win && node scripts/portable-zip.mjs",
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:linux": "npm run build && electron-builder --linux"
   },
@@ -64,7 +64,8 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "artifactName": "Converta-windows.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -79,6 +80,12 @@
           "arch": [
             "universal"
           ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
         }
       ],
       "category": "public.app-category.utilities",
@@ -90,6 +97,12 @@
       "target": [
         {
           "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
           "arch": [
             "x64"
           ]

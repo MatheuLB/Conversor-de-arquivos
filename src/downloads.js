@@ -10,6 +10,13 @@ const FILES = {
   linux: 'Converta-linux.AppImage',
 };
 
+// Versões portáteis: extrair e abrir, sem instalar.
+const PORTABLE = {
+  windows: 'Converta-windows.zip',
+  mac: 'Converta-mac.zip',
+  linux: 'Converta-linux.tar.gz',
+};
+
 function currentOs() {
   const p = (navigator.userAgentData?.platform || navigator.platform || navigator.userAgent).toLowerCase();
   if (p.includes('win')) return 'windows';
@@ -33,6 +40,13 @@ export function setupDownloads() {
       a.addEventListener('click', (e) => e.preventDefault());
       a.setAttribute('aria-disabled', 'true');
     }
+  }
+
+  if (repo) {
+    for (const a of document.querySelectorAll('[data-portable]')) {
+      a.href = `https://github.com/${repo}/releases/latest/download/${PORTABLE[a.dataset.portable]}`;
+    }
+    document.querySelector('#portable').hidden = false;
   }
 
   if (!repo) {

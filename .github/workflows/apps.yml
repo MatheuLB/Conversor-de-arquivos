@@ -30,6 +30,9 @@ jobs:
         env:
           # Sem certificado de assinatura: o Mac recebe assinatura "ad-hoc".
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Versão portátil do Windows (.zip)
+        if: runner.os == 'Windows'
+        run: node scripts/portable-zip.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: converta-${{ runner.os }}
@@ -37,6 +40,8 @@ jobs:
             release/*.exe
             release/*.dmg
             release/*.AppImage
+            release/*.zip
+            release/*.tar.gz
           if-no-files-found: error
       - name: Anexar à Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -46,3 +51,5 @@ jobs:
             release/*.exe
             release/*.dmg
             release/*.AppImage
+            release/*.zip
+            release/*.tar.gz

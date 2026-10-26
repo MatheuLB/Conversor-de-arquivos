@@ -1197,6 +1197,20 @@ a {
   font-weight: 600;
 }
 
+.promo__portable {
+  grid-column: 2;
+  margin: 0;
+  color: var(--promo-soft);
+  font-size: var(--fs-sm);
+}
+
+.promo__portable a {
+  color: var(--promo-fg);
+  font-weight: 550;
+  text-decoration-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  text-underline-offset: 3px;
+}
+
 .promo__note {
   grid-column: 2;
   margin: 0;
@@ -1210,7 +1224,8 @@ a {
 
 @media (max-width: 860px) {
   .promo { grid-template-columns: minmax(0, 1fr); }
-  .promo__note { grid-column: 1; }
+  .promo__note,
+  .promo__portable { grid-column: 1; }
 }
 
 @media (max-width: 560px) {
