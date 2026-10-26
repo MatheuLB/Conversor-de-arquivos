@@ -1,12 +1,20 @@
-# Gera os instaladores para Windows, macOS e Linux.
-# Ao criar uma tag (ex.: v1.0.0), os arquivos são anexados a uma Release do GitHub,
-# e os botões "Baixar o app" do site passam a apontar para eles.
+# Gera os instaladores e as versões portáteis para Windows, macOS e Linux
+# e publica tudo numa Release do GitHub. Os botões "Baixar o app" do site apontam para ela.
+#
+# Duas formas de lançar uma versão:
+#   - Actions → "Gerar apps" → "Run workflow" e digite a versão (ex.: v1.0.1)
+#   - ou crie uma tag: git tag v1.0.1 && git push origin v1.0.1
 name: Gerar apps
 
 on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      versao:
+        description: 'Versão a publicar (ex.: v1.0.1)'
+        required: true
+        default: 'v1.0.0'
 
 permissions:
   contents: write
@@ -43,13 +51,33 @@ jobs:
             release/*.zip
             release/*.tar.gz
           if-no-files-found: error
-      - name: Anexar à Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
         with:
-          files: |
-            release/*.exe
-            release/*.dmg
-            release/*.AppImage
-            release/*.zip
-            release/*.tar.gz
+          path: arquivos
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.versao || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          name: Converta ${{ github.event.inputs.versao || github.ref_name }}
+          make_latest: true
+          files: arquivos/*
+          body: |
+            ## Baixar
+
+            | Sistema | Instalar | Sem instalar (extrair e abrir) |
+            |---|---|---|
+            | Windows | `Converta-Setup.exe` | `Converta-windows.zip` → pasta `Converta` → `Converta.exe` |
+            | macOS | `Converta-mac.dmg` | `Converta-mac.zip` → `Converta.app` |
+            | Linux | `Converta-linux.AppImage` | `Converta-linux.tar.gz` → `converta` |
+
+            **Primeira vez no Windows:** se aparecer "O Windows protegeu o computador", clique em
+            **Mais informações → Executar assim mesmo**.
+
+            **Primeira vez no Mac:** se aparecer um aviso, abra **Ajustes do Sistema → Privacidade e Segurança**
+            e clique em **Abrir Mesmo Assim**.

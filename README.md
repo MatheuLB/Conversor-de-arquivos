@@ -42,14 +42,11 @@ na Netlify, Vercel, Cloudflare Pages ou qualquer hospedagem.
 
 ## Gerar os apps para Windows, macOS e Linux
 
-O workflow **Gerar apps** (`.github/workflows/apps.yml`) monta os três instaladores nas máquinas do GitHub.
-Para lançar uma versão:
+O workflow **Gerar apps** (`.github/workflows/apps.yml`) monta os instaladores e as versões portáteis
+nas máquinas do GitHub. Para lançar uma versão (troque antes o `version` no `package.json`):
 
-```bash
-# troque "version" no package.json, depois:
-git tag v1.0.0
-git push origin v1.0.0
-```
+- pelo site do GitHub: **Actions → Gerar apps → Run workflow**, digite a versão (ex.: `v1.0.1`) e confirme;
+- ou pelo terminal: `git tag v1.0.1 && git push origin v1.0.1`.
 
 Em uns 10 minutos aparece uma **Release** no GitHub com:
 
