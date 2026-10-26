@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Converta</title>
+  <meta name="description" content="Converta imagens, PDFs, vídeos, áudios, documentos e planilhas para outro formato. Tudo acontece no seu dispositivo: seus arquivos não são enviados para nenhum servidor.">
+  <meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c121c" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top__inner">
+      <a class="brand" href="./" aria-label="Converta, página inicial">
+        <img class="brand__mark" src="./icon.svg" alt="" width="32" height="32">
+        <span class="brand__name">Converta</span>
+      </a>
+      <nav class="top__nav" aria-label="Seções">
+        <a href="#formatos">Formatos</a>
+        <a href="#baixar" data-web-only>Baixar o app</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro wrap">
+      <h1 class="intro__title">Qualquer arquivo, <span class="mark">no formato que você precisa.</span></h1>
+      <p class="intro__lede">
+        Imagens, PDFs, vídeos, áudios, documentos e planilhas. A conversão acontece aqui mesmo,
+        no seu dispositivo: nenhum arquivo é enviado para a internet.
+      </p>
+    </section>
+
+    <section class="desk wrap" aria-label="Conversor">
+      <div id="drop" class="drop" tabindex="0" role="button" aria-describedby="drop-hint">
+        <input id="file-input" type="file" multiple hidden>
+        <div class="drop__art" aria-hidden="true">
+          <span class="chip chip--image">.heic</span>
+          <span class="drop__arrow">→</span>
+          <span class="chip chip--image">.jpg</span>
+        </div>
+        <p class="drop__title">Solte os arquivos aqui</p>
+        <p id="drop-hint" class="drop__hint">ou <span class="link">escolha no computador</span>. Também dá para colar imagens com Ctrl+V.</p>
+      </div>
+
+      <div id="queue-area" class="queue-area" hidden>
+        <div class="toolbar">
+          <div class="toolbar__group">
+            <label for="convert-all-to" class="toolbar__label">Converter todos para</label>
+            <select id="convert-all-to" class="select"></select>
+          </div>
+          <div class="toolbar__group toolbar__actions">
+            <button id="btn-merge" class="btn btn--ghost" type="button" hidden>Juntar em um PDF</button>
+            <button id="btn-zip" class="btn btn--ghost" type="button" hidden>Baixar tudo (.zip)</button>
+            <button id="btn-clear" class="btn btn--ghost" type="button">Limpar</button>
+            <button id="btn-convert" class="btn btn--primary" type="button">Converter</button>
+          </div>
+        </div>
+        <ol id="queue" class="queue" aria-live="polite"></ol>
+      </div>
+
+      <details class="settings" id="settings">
+        <summary>Ajustes de qualidade</summary>
+        <div class="settings__grid">
+          <div class="field">
+            <label for="opt-quality">Qualidade de imagem (JPG, WEBP, AVIF)</label>
+            <div class="range">
+              <input id="opt-quality" type="range" min="40" max="100" step="1" value="90">
+              <output id="opt-quality-out" for="opt-quality">90%</output>
+            </div>
+          </div>
+          <div class="field">
+            <label for="opt-maxwidth">Largura máxima da imagem</label>
+            <select id="opt-maxwidth" class="select">
+              <option value="0" selected>Manter tamanho original</option>
+              <option value="3840">3840 px (4K)</option>
+              <option value="1920">1920 px (Full HD)</option>
+              <option value="1280">1280 px</option>
+              <option value="800">800 px</option>
+              <option value="512">512 px</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="opt-pdfpage">Página do PDF (imagens → PDF)</label>
+            <select id="opt-pdfpage" class="select">
+              <option value="image" selected>Do tamanho da imagem</option>
+              <option value="a4">Folha A4</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="opt-dpi">Resolução (PDF → imagem)</label>
+            <select id="opt-dpi" class="select">
+              <option value="72">72 dpi (tela)</option>
+              <option value="150" selected>150 dpi (padrão)</option>
+              <option value="300">300 dpi (impressão)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="opt-video">Qualidade de vídeo</label>
+            <select id="opt-video" class="select">
+              <option value="alta">Alta (arquivo maior)</option>
+              <option value="media" selected>Média</option>
+              <option value="baixa">Baixa (arquivo menor)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="opt-bitrate">Qualidade de áudio</label>
+            <select id="opt-bitrate" class="select">
+              <option value="128">128 kbps</option>
+              <option value="192" selected>192 kbps</option>
+              <option value="320">320 kbps</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="opt-csv">Separador do CSV</label>
+            <select id="opt-csv" class="select">
+              <option value="," selected>Vírgula ( , )</option>
+              <option value=";">Ponto e vírgula ( ; ) para Excel em português</option>
+            </select>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="formatos" class="formats wrap" aria-labelledby="formatos-titulo">
+      <h2 id="formatos-titulo" class="section-title">Formatos</h2>
+      <p class="section-lede">Solte um arquivo de qualquer formato da esquerda e escolha um da direita.</p>
+      <div id="format-table" class="format-table"></div>
+    </section>
+
+    <section id="baixar" class="get-app" aria-labelledby="baixar-titulo" data-web-only>
+      <div class="wrap get-app__inner">
+        <div class="get-app__text">
+          <h2 id="baixar-titulo" class="section-title">Use sem internet</h2>
+          <p>O app para computador faz as mesmas conversões sem precisar do navegador, e funciona offline.
+             Também gera PDF de documentos Word, Markdown e HTML automaticamente.</p>
+        </div>
+        <ul class="platforms" id="platforms">
+          <li><a class="platform" data-os="windows" href="#"><span class="platform__os">Windows</span><span class="platform__file">Instalador .exe · 64 bits</span></a></li>
+          <li><a class="platform" data-os="mac" href="#"><span class="platform__os">macOS</span><span class="platform__file">.dmg · Intel e Apple Silicon</span></a></li>
+          <li><a class="platform" data-os="linux" href="#"><span class="platform__os">Linux</span><span class="platform__file">.AppImage · 64 bits</span></a></li>
+        </ul>
+        <p class="get-app__note" id="platforms-note"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot wrap">
+    <p>Converta funciona inteiramente no seu dispositivo. Conversões de áudio e vídeo usam o <a href="https://ffmpeg.org" target="_blank" rel="noopener">FFmpeg</a>.</p>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
