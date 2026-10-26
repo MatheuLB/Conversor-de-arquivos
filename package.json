@@ -5,6 +5,11 @@
   "description": "Converta arquivos para outro formato direto no seu dispositivo: imagens, PDF, vídeo, áudio, documentos e planilhas.",
   "author": "Converta",
   "license": "GPL-3.0-or-later",
+  "homepage": "https://matheulb.github.io/Conversor-de-arquivos/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MatheuLB/Conversor-de-arquivos.git"
+  },
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",

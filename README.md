@@ -12,6 +12,9 @@ A conversão acontece no próprio dispositivo: nenhum arquivo é enviado para se
 | Documento | DOCX, MD, HTML, TXT | PDF, HTML, MD, TXT |
 | Dados | XLSX, CSV, TSV, JSON, YAML, XML | XLSX, CSV, TSV, JSON, YAML, XML, HTML |
 
+**Site:** https://matheulb.github.io/Conversor-de-arquivos/
+**Baixar o app:** [página de versões (Releases)](https://github.com/MatheuLB/Conversor-de-arquivos/releases/latest)
+
 Extras: converter vários arquivos de uma vez, juntar imagens e PDFs em um único PDF, baixar tudo em .zip,
 colar imagens com Ctrl+V e ajustar qualidade, tamanho e resolução.
 
