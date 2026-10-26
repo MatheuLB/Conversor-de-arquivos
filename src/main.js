@@ -1,11 +1,16 @@
 import './styles.css';
-import { KINDS, acceptedExtensions, catalogByKind, detect, kindOf, labelOf, targetsFor } from './formats.js';
+import { FORMATS, KINDS, acceptedExtensions, catalogByKind, detect, kindOf, labelOf, targetsFor } from './formats.js';
 import { cancelMedia, convertFile, mergeIntoPdf, usesMedia } from './convert.js';
 import { UserError, downloadBlob, formatBytes, zipBlobs } from './util.js';
 import { setupDownloads } from './downloads.js';
+import { hydrateIcons, icon } from './icons.js';
 
 const isDesktop = Boolean(window.desktop?.isDesktop);
-if (isDesktop) document.documentElement.classList.add('is-desktop');
+if (isDesktop) {
+  document.documentElement.classList.add('is-desktop');
+  document.documentElement.dataset.platform = window.desktop.platform;
+}
+hydrateIcons();
 
 const $ = (sel) => document.querySelector(sel);
 const els = {
@@ -144,7 +149,8 @@ function addFiles(fileList) {
 function renderItem(item) {
   const kind = item.ext ? kindOf(item.ext) : null;
   const name = item.file.name || 'arquivo';
-  const chip = el('span', { class: `chip ${kind ? `chip--${kind}` : ''} item__in` }, item.ext ? `.${item.ext}` : '?');
+  const tile = el('span', { class: `tile${kind ? ` tile--${kind}` : ''}`, 'aria-hidden': 'true' },
+    icon(kind || 'doc'), el('span', { class: 'tile__ext' }, item.ext || '?'));
   const meta = el('p', { class: 'item__meta' }, formatBytes(item.file.size));
   const file = el('div', { class: 'item__file' }, el('p', { class: 'item__name', title: name }, name), meta);
 
@@ -158,20 +164,20 @@ function renderItem(item) {
       if (item.status !== 'working') resetItem(item);
       refresh();
     });
-    to = el('div', { class: 'item__to' }, el('span', { class: 'arrow', 'aria-hidden': 'true' }, '→'), select);
+    to = el('div', { class: 'item__to' }, icon('arrow'), select);
   } else {
     to = el('div', { class: 'item__to' }, 'Formato não suportado');
   }
 
   const remove = el('button', {
-    class: 'item__remove',
+    class: 'icon-btn',
     type: 'button',
     'aria-label': `Remover ${name}`,
     title: 'Remover',
     onclick: () => removeItem(item),
-  }, '×');
+  }, icon('close'));
 
-  const li = el('li', { class: `item${item.supported ? '' : ' item--unsupported'}` }, chip, file, to,
+  const li = el('li', { class: `item${item.supported ? '' : ' item--unsupported'}` }, tile, file, to,
     el('div', { class: 'item__status' }), remove);
   return li;
 }
@@ -211,25 +217,25 @@ function renderStatus(item) {
       if (item.message && !known) box.append(el('span', { class: 'status-text' }, item.message));
       else if (known) box.append(el('span', { class: 'progress-label' }, `${Math.round(item.progress * 100)}%`));
       if (usesMedia(item.ext, item.target)) {
-        box.append(el('button', { class: 'btn btn--ghost btn--small', type: 'button', onclick: () => cancelMedia() }, 'Cancelar'));
+        box.append(el('button', { class: 'btn btn--quiet', type: 'button', onclick: () => cancelMedia() }, 'Cancelar'));
       }
       break;
     }
     case 'done': {
       const size = item.results.reduce((n, r) => n + r.blob.size, 0);
-      box.append(el('span', { class: 'status-text status-text--ok' }, formatBytes(size)));
+      box.append(el('span', { class: 'status-text status-text--ok' }, icon('check'), formatBytes(size)));
       box.append(el('button', {
-        class: 'btn btn--marker btn--small',
+        class: 'btn btn--primary btn--small',
         type: 'button',
         onclick: () => item.results.forEach((r) => downloadBlob(r.blob, r.name)),
-      }, 'Baixar'));
+      }, icon('download'), 'Baixar'));
       break;
     }
     case 'printed':
-      box.append(el('span', { class: 'status-text' }, 'Na janela de impressão, escolha “Salvar como PDF”.'));
+      box.append(el('span', { class: 'status-text' }, icon('printer'), 'Na janela de impressão, escolha “Salvar como PDF”.'));
       break;
     case 'error':
-      box.append(el('span', { class: 'status-text status-text--err' }, item.message));
+      box.append(el('span', { class: 'status-text status-text--err' }, icon('alert'), el('span', {}, item.message)));
       break;
     default:
       break;
@@ -343,7 +349,7 @@ els.merge.addEventListener('click', async () => {
   const parts = items.filter((i) => i.supported && (kindOf(i.ext) === 'image' || i.ext === 'pdf'));
   running = true;
   refresh();
-  els.merge.textContent = 'Juntando…';
+  els.merge.querySelector('.btn__label').textContent = 'Juntando…';
   try {
     const blob = await mergeIntoPdf(parts.map((i) => ({ file: i.file, ext: i.ext })), readSettings());
     downloadBlob(blob, 'documento-unido.pdf');
@@ -352,7 +358,7 @@ els.merge.addEventListener('click', async () => {
     if (!(err instanceof UserError)) console.error(err);
     toast(err instanceof UserError ? err.message : 'Não foi possível juntar os arquivos.');
   } finally {
-    els.merge.textContent = 'Juntar em um PDF';
+    els.merge.querySelector('.btn__label').textContent = 'Juntar em um PDF';
     running = false;
     refresh();
   }
@@ -420,17 +426,20 @@ document.addEventListener('paste', (e) => {
 
 function renderFormatTable() {
   const catalog = catalogByKind();
-  const table = $('#format-table');
+  const grid = $('#format-table');
+  $('#formatos-titulo').textContent = `${Object.keys(FORMATS).length} formatos`;
+  const chips = (exts) => el('div', { class: 'chips' }, ...exts.map((e) => el('span', { class: `chip chip--${kindOf(e)}` }, e)));
   for (const [kind, { label }] of Object.entries(KINDS)) {
     const entry = catalog[kind];
     if (!entry) continue;
-    const chips = (exts) => el('div', { class: 'format-row__chips' },
-      ...exts.map((e) => el('span', { class: `chip chip--${kindOf(e)}` }, e)));
-    table.append(el('div', { class: 'format-row' },
-      el('div', { class: 'format-row__kind' }, label),
-      el('div', {}, el('span', { class: 'format-row__label' }, 'De'), chips(entry.inputs)),
-      el('div', { class: 'format-row__arrow', 'aria-hidden': 'true' }, '→'),
-      el('div', {}, el('span', { class: 'format-row__label' }, 'Para'), chips(entry.outputs))));
+    grid.append(el('article', { class: `kind-card kind-card--${kind}` },
+      el('div', { class: 'kind-card__head' },
+        el('span', { class: `tile tile--${kind}`, 'aria-hidden': 'true' }, icon(kind)),
+        el('div', {},
+          el('h3', { class: 'kind-card__title' }, label),
+          el('p', { class: 'kind-card__count' }, `${entry.inputs.length} ${entry.inputs.length === 1 ? 'formato' : 'formatos'} de entrada`))),
+      el('div', {}, el('p', { class: 'kind-card__label' }, 'Abre'), chips(entry.inputs)),
+      el('div', {}, el('p', { class: 'kind-card__label' }, 'Converte para'), chips(entry.outputs))));
   }
 }
 

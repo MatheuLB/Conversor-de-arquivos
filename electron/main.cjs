@@ -26,6 +26,13 @@ function serveDist() {
 }
 
 let mainWindow = null;
+const isMac = process.platform === 'darwin';
+
+// Cores dos botões da janela (Windows/Linux), iguais ao cabeçalho do app.
+function titleBarOverlay() {
+  const dark = nativeTheme.shouldUseDarkColors;
+  return { color: dark ? '#07090f' : '#f6f7fb', symbolColor: dark ? '#eef1f7' : '#0b1220', height: 60 };
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -34,9 +41,12 @@ function createWindow() {
     minWidth: 420,
     minHeight: 520,
     title: 'Converta',
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0c121c' : '#f2f4f7',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#07090f' : '#f6f7fb',
     icon: path.join(__dirname, '..', 'build', 'icon.png'),
     autoHideMenuBar: true,
+    // Sem barra de título do sistema: o cabeçalho do app faz esse papel.
+    titleBarStyle: 'hidden',
+    ...(isMac ? { trafficLightPosition: { x: 18, y: 22 } } : { titleBarOverlay: titleBarOverlay() }),
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -91,6 +101,12 @@ if (!app.requestSingleInstanceLock()) {
     if (!mainWindow) return;
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
+  });
+
+  nativeTheme.on('updated', () => {
+    if (!mainWindow) return;
+    mainWindow.setBackgroundColor(nativeTheme.shouldUseDarkColors ? '#07090f' : '#f6f7fb');
+    if (!isMac) mainWindow.setTitleBarOverlay(titleBarOverlay());
   });
 
   app.whenReady().then(() => {

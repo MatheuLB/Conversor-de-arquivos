@@ -1,6 +1,6 @@
 // Gera build/icon.png (1024 px) a partir de public/icon.svg. O electron-builder
 // transforma esse PNG em .ico (Windows) e .icns (Mac).
-// Uso: node scripts/make-icon.mjs   (precisa do Playwright instalado)
+// Uso: node scripts/make-icon.mjs   (precisa do Playwright: npx playwright install chromium)
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
